@@ -1,0 +1,1 @@
+# `rigpy` - tool for generation of simple static web pages in Python
