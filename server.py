@@ -3,6 +3,7 @@ import time
 
 HOST, PORT = '127.0.0.1', 9999
 
+# TODO: Add selector or any other way to make sock.accept() nonblocking
 
 try:
     with socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM) as sock:
@@ -12,19 +13,11 @@ try:
             conn, addr = sock.accept()
             data = conn.recv(1024)
             print("Data received from the client")
-            print(data)
+            with open("./templates/index.html", "r") as file:
+                html = file.read()
+            to_send = "HTTP/1.1 200\r\nOK\r\n\r\n" + html
             conn.sendall(
-    bytes(f"""HTTP/1.1 200 OK\r\nContent-type: text/html\r\n
-    \r\n
-    <!doctype html>
-    <html>
-        <head/>
-        <body>
-            <h1>Welcome to the server!</h1>
-        </body>
-    </html>
-    \r\n\r\n
-    """, "utf-8"))
+    bytes(to_send, "utf-8"))
             conn.close()
 
 except KeyboardInterrupt:
