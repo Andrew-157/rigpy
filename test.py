@@ -1,6 +1,5 @@
 
-class MyClass:
-    _a = 1
-    __b = 2
+a = [(1, "a"), (2, "b")]
 
-print(MyClass.__b)
+for number, letter in a:
+    print(f"{number}:{letter}")
