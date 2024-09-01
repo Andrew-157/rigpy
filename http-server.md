@@ -278,7 +278,7 @@ Server and Client are fundamentally the same, but with one important difference.
 
 Note that by doing this, the server depends on the client being well-behaved: the server expects the client to close its side of the connection when it’s done sending messages. If the client doesn’t close, the server will leave the connection open. In a real application, you may want to guard against this in your server by implementing a timeout to prevent client connections from accumulating if they don’t send a request after a certain amount of time.
 
-### Running Client Server:
+### Running Client Server
 
 server terminal:
 
@@ -308,3 +308,54 @@ Closing connection 1
 Received b'Message 1 from client.Message 2 from client.' from connection 2
 Closing connection 2
 ```
+
+## Application Client and Server
+
+Multi-Connection Client and Server have some problems:
+
+- Exceptions are not handled
+- Server doesn't really know how much bytes it should read from the socket. For this application-layer protocol should be defined and both server and client should follow this protocol. The approach used by HTTP protocol will be used. Messages will be prefixed with the **header** that would contain the information about the length of the incoming data, so that the server can call `.recv()` as many times as needed until the whole message is read.
+
+## Application Protocol Header
+
+The protocol header is:
+
+- Variable-Length Text
+- Unicode with the encoding UTF-8
+- JSON serialized Python dictionary
+
+The contents of the protocol header's dictionary:
+
+- `byteorder`: The byte order of the machine (uses `sys.byteorder`). This may not be required.
+
+- `content-length`: The length of the content in bytes.
+
+- `content-type`: The type of content in the payload, for example, text/json or binary/my-binary-type.
+
+- `content-encoding`: The encoding used by the content, for example, utf-8 for Unicode text or binary for binary data.
+
+## Application Message
+
+We'll prefix a variable-length JSON header with a fixed-length 2-byte header that contains the length of the JSON header.
+
+How it looks like:
+
+______________
+    Fixed-Length Header:
+   - Type: 2-byte integer
+   - Byte Order: network(big-endian)
+______________
+
+______________
+    Variable-Length JSON Header:
+   - Type: Unicode Text
+   - Encoding: UTF-8
+   - Length: specified by fixed-length header 
+______________
+
+______________
+    Variable-Length Content:
+   - Type: Specified in JSON header
+   - Encoding: Specified in JSON header
+   - Length: Specified in JSON header
+______________
